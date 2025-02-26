@@ -53,3 +53,12 @@ def register_view(request):
         form = UserCreationForm()    
 
     return render(request, 'register.html', {'form': form})
+
+def client(request, pk):
+    if request.user.is_authenticated:
+        # look up the specific client date
+        client_record = Client.objects.get(id=pk)
+        return render(request, 'client.html', {'client': client_record})
+    else:
+        messages.success(request, 'You must be logged in to view this page')
+        return redirect('home')

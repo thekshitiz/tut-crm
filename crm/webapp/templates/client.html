@@ -1,0 +1,17 @@
+{% extends 'base.html' %} {% block content %}
+<h1>Client Record</h1>
+
+<div class="client-details">
+    
+    <p><strong>Email:</strong> {{ client.email }}</p>
+    <p><strong>Phone:</strong> {{ client.phone }}</p>
+    {% if client.address %}
+    <p><strong>Address:</strong> {{ client.address }}</p>
+    {% endif %}
+    <p><strong>City:</strong> {{ client.city }}</p>
+    <p><strong>State:</strong> {{ client.state }}</p>
+    <p><strong>Zipcode:</strong> {{ client.zipcode }}</p>
+    <p><strong>Created At:</strong> {{ client.created_at }}</p>
+</div>
+
+{% endblock %}
