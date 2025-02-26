@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from .models import Client
+from .forms import AddClientForm
 
 # Create your views here.
 def home(request):
@@ -62,3 +63,42 @@ def client(request, pk):
     else:
         messages.success(request, 'You must be logged in to view this page')
         return redirect('home')
+
+def client_delete(request, pk):
+    if request.user.is_authenticated:
+        delete_record = Client.objects.get(id=pk)
+        delete_record.delete()
+        messages.success(request, 'Client record deleted successfully')
+        return redirect('home')
+    else:
+        messages.success(request, 'You must be logged in to delete a client record')
+        return redirect('home')
+    
+
+def add_client(request):
+    form = AddClientForm(request.POST or None)
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Client added successfully')
+                return redirect('home')
+            else:   
+                messages.error(request, 'There was an error adding the client')
+        return render(request, 'add_client.html', {'form': form})
+    else:
+        messages.success(request, 'You must be logged in to add a client')
+        return redirect('home')
+
+def client_update(request, pk):
+    if request.user.is_authenticated:
+        current_record = Client.objects.get(id=pk)
+        form = AddClientForm(request.POST or None, instance=current_record)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Client updated successfully')
+            return redirect('home')
+        return render(request, 'client_update.html', {'form': form})
+    else:
+        messages.success(request, 'You must be logged in to update a client')
+        return redirect('home') 

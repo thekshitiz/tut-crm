@@ -1,17 +1,75 @@
 {% extends 'base.html' %} {% block content %}
 <h1>Client Record</h1>
+<div class="card">
+    <div class="card-header">{{ client.full_name }}</div>
+    <div class="card-body">
+        <h5 class="card-title">Contact Information</h5>
+        <div class="client-details">
+            <p><strong>Email:</strong> {{ client.email }}</p>
+            <p><strong>Phone:</strong> {{ client.phone }}</p>
+            {% if client.address %}
+            <p><strong>Address:</strong> {{ client.address }}</p>
+            {% endif %}
+            <p><strong>City:</strong> {{ client.city }}</p>
+            <p><strong>State:</strong> {{ client.state }}</p>
+            <p><strong>Zipcode:</strong> {{ client.zipcode }}</p>
+            <p><strong>Created At:</strong> {{ client.created_at }}</p>
+        </div>
+        <a href="{% url 'home' %}" class="btn btn-primary">Go Back</a>
+        <a href="{% url 'client_update' client.id %}" class="btn btn-warning"
+            >Update</a
+        >
+        <button
+            type="button"
+            class="btn btn-danger"
+            data-bs-toggle="modal"
+            data-bs-target="#deleteModal"
+        >
+            Delete
+        </button>
 
-<div class="client-details">
-    
-    <p><strong>Email:</strong> {{ client.email }}</p>
-    <p><strong>Phone:</strong> {{ client.phone }}</p>
-    {% if client.address %}
-    <p><strong>Address:</strong> {{ client.address }}</p>
-    {% endif %}
-    <p><strong>City:</strong> {{ client.city }}</p>
-    <p><strong>State:</strong> {{ client.state }}</p>
-    <p><strong>Zipcode:</strong> {{ client.zipcode }}</p>
-    <p><strong>Created At:</strong> {{ client.created_at }}</p>
+        <!-- Delete Confirmation Modal -->
+        <div
+            class="modal fade"
+            id="deleteModal"
+            tabindex="-1"
+            aria-labelledby="deleteModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">
+                            Confirm Deletion
+                        </h5>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete {{ client.full_name }}'s
+                        record? This action cannot be undone.
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Cancel
+                        </button>
+                        <a
+                            href="{% url 'client_delete' client.id %}"
+                            class="btn btn-danger"
+                            >Delete</a
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 {% endblock %}
