@@ -1,32 +1,33 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from .models import Client
-from .forms import AddClientForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView
+from django.db.models import Q
+from .models import Client, Order
+from .forms import AddClientForm, OrderForm
 
 # Create your views here.
-def home(request):
-    # grab all the client data records
-    clients = Client.objects.all()
+def home_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
     
-    # check if it's a POST request (login attempt)
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-
-        # authenticate the user
+        username = request.POST.get('username')
+        password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
+        
         if user is not None:
             login(request, user)
             messages.success(request, 'You have been logged in')
-            return redirect('home')
+            return redirect('dashboard')
         else:
-            messages.success(request, 'There was an error logging in, please try again')
+            messages.error(request, 'Invalid username or password')
             return redirect('home')
     
-    # if it's a GET request, just render the page
-    return render(request, 'home.html', {'clients': clients })
+    return render(request, 'home.html')
 
 # this function we will use to create a separate login page
 # def login_view(request):
@@ -40,65 +41,104 @@ def logout_view(request):
 
 
 def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+        
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password1']
-            user = authenticate(request, username=username, password=password)
+            user = form.save()
             login(request, user)
-            messages.success(request, 'Registration successful and you are now logged in')
-            return redirect('home')
+            messages.success(request, 'Registration successful')
+            return redirect('dashboard')
     else:
-        form = UserCreationForm()    
-
+        form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
 
-def client(request, pk):
-    if request.user.is_authenticated:
-        # look up the specific client date
-        client_record = Client.objects.get(id=pk)
-        return render(request, 'client.html', {'client': client_record})
-    else:
-        messages.success(request, 'You must be logged in to view this page')
-        return redirect('home')
+@login_required
+def dashboard_view(request):
+    clients = Client.objects.all().order_by('-created_at')
+    return render(request, 'dashboard.html', {'clients': clients})
 
+@login_required
+def client_view(request, pk):
+    client = get_object_or_404(Client, pk=pk)
+    orders = client.orders.all().order_by('-order_date')
+    return render(request, 'client.html', {'client': client, 'orders': orders})
+
+@login_required
 def client_delete(request, pk):
-    if request.user.is_authenticated:
-        delete_record = Client.objects.get(id=pk)
-        delete_record.delete()
-        messages.success(request, 'Client record deleted successfully')
-        return redirect('home')
-    else:
-        messages.success(request, 'You must be logged in to delete a client record')
-        return redirect('home')
+    client = get_object_or_404(Client, pk=pk)
+    client.delete()
+    messages.success(request, 'Client deleted successfully')
+    return redirect('dashboard')
     
 
+@login_required
 def add_client(request):
-    form = AddClientForm(request.POST or None)
-    if request.user.is_authenticated:
-        if request.method == 'POST':
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Client added successfully')
-                return redirect('home')
-            else:   
-                messages.error(request, 'There was an error adding the client')
-        return render(request, 'add_client.html', {'form': form})
+    if request.method == 'POST':
+        form = AddClientForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Client added successfully')
+            return redirect('dashboard')
     else:
-        messages.success(request, 'You must be logged in to add a client')
-        return redirect('home')
+        form = AddClientForm()
+    return render(request, 'add_client.html', {'form': form})
 
+@login_required
 def client_update(request, pk):
-    if request.user.is_authenticated:
-        current_record = Client.objects.get(id=pk)
-        form = AddClientForm(request.POST or None, instance=current_record)
+    client = get_object_or_404(Client, pk=pk)
+    if request.method == 'POST':
+        form = AddClientForm(request.POST, instance=client)
         if form.is_valid():
             form.save()
             messages.success(request, 'Client updated successfully')
-            return redirect('home')
-        return render(request, 'client_update.html', {'form': form})
+            return redirect('dashboard')
     else:
-        messages.success(request, 'You must be logged in to update a client')
-        return redirect('home') 
+        form = AddClientForm(instance=client)
+    return render(request, 'client_update.html', {'form': form})
+
+class HomeView(LoginRequiredMixin, ListView):
+    model = Client
+    template_name = 'dashboard.html'
+    context_object_name = 'clients'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        queryset = Client.objects.all()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(full_name__icontains=search_query) |
+                Q(email__icontains=search_query) |
+                Q(phone__icontains=search_query) |
+                Q(city__icontains=search_query) |
+                Q(state__icontains=search_query)
+            )
+        
+        return queryset.order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'You have been logged in')
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid username or password')
+    
+    return redirect('home')

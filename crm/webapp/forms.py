@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import Client
+from .models import Client, Order
 
 class RegisterUserForm(UserCreationForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
@@ -37,3 +37,14 @@ class AddClientForm(forms.ModelForm):
     class Meta:
         model = Client
         exclude = ('user',)
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['order_number', 'amount', 'status', 'description']
+        widgets = {
+            'order_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
