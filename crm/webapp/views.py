@@ -2,10 +2,14 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
+from .models import Client
 
 # Create your views here.
 def home(request):
-    # check the logged in user
+    # grab all the client data records
+    clients = Client.objects.all()
+    
+    # check if it's a POST request (login attempt)
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -19,7 +23,9 @@ def home(request):
         else:
             messages.success(request, 'There was an error logging in, please try again')
             return redirect('home')
-    return render(request, 'home.html', {})
+    
+    # if it's a GET request, just render the page
+    return render(request, 'home.html', {'clients': clients })
 
 # this function we will use to create a separate login page
 # def login_view(request):

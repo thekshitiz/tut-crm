@@ -2,8 +2,20 @@
 <h1>Welcome to CRM</h1>
 
 {% if user.is_authenticated %}
-<h2>Welcome {{ user.username }}!</h2>
+<h1>Client List</h1>
+{% if clients %}
+{% for client in clients %}
+{{ client.full_name }} <br>
+{{ client.email }} <br>
+{{ client.phone }} <br>
+{{ client.address }} <br>
+{{ client.city }} <br>
+{{ client.state }} <br>
+{{ client.zipcode }} <br>   
+{% endfor %}
+{% endif %}
 {% else %}
+
 <div class="header-login">
     <form method="post" action="{% url 'home' %}">
         {% csrf_token %}
