@@ -1,5 +1,27 @@
-{% extends 'base.html' %} 
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <h1>Welcome to CRM</h1>
-{% endblock content %}
+
+{% if user.is_authenticated %}
+<h2>Welcome {{ user.username }}!</h2>
+{% else %}
+<div class="header-login">
+    <form method="post" action="{% url 'home' %}">
+        {% csrf_token %}
+        <input
+            type="text"
+            class="form-control mb-2"
+            placeholder="Username"
+            name="username"
+            required
+        />
+        <input
+            type="password"
+            class="form-control mb-2"
+            placeholder="Password"
+            name="password"
+            required
+        />
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
+{% endif %} {% endblock content %}
