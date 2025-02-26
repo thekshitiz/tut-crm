@@ -1,73 +1,120 @@
 {% extends 'base.html' %} {% block content %}
-<h1>Client Record</h1>
-<div class="card">
-    <div class="card-header">{{ client.full_name }}</div>
-    <div class="card-body">
-        <h5 class="card-title">Contact Information</h5>
-        <div class="client-details">
-            <p><strong>Email:</strong> {{ client.email }}</p>
-            <p><strong>Phone:</strong> {{ client.phone }}</p>
-            {% if client.address %}
-            <p><strong>Address:</strong> {{ client.address }}</p>
-            {% endif %}
-            <p><strong>City:</strong> {{ client.city }}</p>
-            <p><strong>State:</strong> {{ client.state }}</p>
-            <p><strong>Zipcode:</strong> {{ client.zipcode }}</p>
-            <p><strong>Created At:</strong> {{ client.created_at }}</p>
-        </div>
-        <a href="{% url 'home' %}" class="btn btn-primary">Go Back</a>
-        <a href="{% url 'client_update' client.id %}" class="btn btn-warning"
-            >Update</a
-        >
-        <button
-            type="button"
-            class="btn btn-danger"
-            data-bs-toggle="modal"
-            data-bs-target="#deleteModal"
-        >
-            Delete
-        </button>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Client Profile</h1>
+    <a href="{% url 'home' %}" class="btn btn-outline-primary"
+        >← Back to List</a
+    >
+</div>
 
-        <!-- Delete Confirmation Modal -->
-        <div
-            class="modal fade"
-            id="deleteModal"
-            tabindex="-1"
-            aria-labelledby="deleteModalLabel"
-            aria-hidden="true"
-        >
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteModalLabel">
-                            Confirm Deletion
-                        </h5>
-                        <button
-                            type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                        ></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to delete {{ client.full_name }}'s
-                        record? This action cannot be undone.
-                    </div>
-                    <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                        >
-                            Cancel
-                        </button>
-                        <a
-                            href="{% url 'client_delete' client.id %}"
-                            class="btn btn-danger"
-                            >Delete</a
-                        >
-                    </div>
+<div class="card">
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 class="card-title h5 mb-0">{{ client.full_name }}</h3>
+            <div class="btn-group">
+                <a
+                    href="{% url 'client_update' client.id %}"
+                    class="btn btn-warning"
+                >
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteModal"
+                >
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="mb-4">
+                    <h6 class="text-secondary mb-2">Contact Information</h6>
+                    <p class="mb-2">
+                        <strong>Email:</strong> {{ client.email }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Phone:</strong> {{ client.phone }}
+                    </p>
                 </div>
+
+                <div>
+                    <h6 class="text-secondary mb-2">Address Details</h6>
+                    {% if client.address %}
+                    <p class="mb-2">
+                        <strong>Street:</strong> {{ client.address }}
+                    </p>
+                    {% endif %}
+                    <p class="mb-2"><strong>City:</strong> {{ client.city }}</p>
+                    <p class="mb-2">
+                        <strong>State:</strong> {{ client.state }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Zipcode:</strong> {{ client.zipcode }}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="bg-light p-4 rounded-3">
+                    <h6 class="text-secondary mb-3">Additional Information</h6>
+                    <p class="mb-2">
+                        <strong>Client Since:</strong> {{
+                        client.created_at|date:"F j, Y" }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Last Updated:</strong> {{
+                        client.created_at|date:"F j, Y" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div
+    class="modal fade"
+    id="deleteModal"
+    tabindex="-1"
+    aria-labelledby="deleteModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    Confirm Deletion
+                </h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">
+                    Are you sure you want to delete
+                    <strong>{{ client.full_name }}</strong>'s record? This
+                    action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Cancel
+                </button>
+                <a
+                    href="{% url 'client_delete' client.id %}"
+                    class="btn btn-danger"
+                    >Delete Permanently</a
+                >
             </div>
         </div>
     </div>
