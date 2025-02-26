@@ -61,12 +61,12 @@
                 <div class="bg-light p-4 rounded-3">
                     <h6 class="text-secondary mb-3">Additional Information</h6>
                     <p class="mb-2">
-                        <strong>Client Since:</strong> {{
-                        client.created_at|date:"F j, Y" }}
+                        <strong>Client Since:</strong>
+                        {{ client.created_at|date:"F j, Y" }}
                     </p>
                     <p class="mb-0">
-                        <strong>Last Updated:</strong> {{
-                        client.created_at|date:"F j, Y" }}
+                        <strong>Last Updated:</strong>
+                        {{ client.updated_at|date:"F j, Y" }}
                     </p>
                 </div>
             </div>
